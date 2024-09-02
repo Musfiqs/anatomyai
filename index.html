@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy AI Chatbot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="chat-container">
+        <header id="header">
+            <h1>Anatomy AI</h1>
+            <nav id="nav">
+                <a href="#">About</a>
+                <a href="#">Chat</a>
+                <a href="#">Contact</a>
+            </nav>
+        </header>
+        <div id="chat-box">
+            <!-- Chat messages will be appended here -->
+        </div>
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        function appendMessage(text, sender) {
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('chat-bubble');
+            messageBubble.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+            messageBubble.innerText = text;
+            chatBox.appendChild(messageBubble);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
+        }
+
+        sendButton.addEventListener('click', function() {
+            const userText = userInput.value.trim();
+            if (userText !== "") {
+                appendMessage(userText, 'user');
+                userInput.value = "";
+
+                // Send message to server and get response
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({user_input: userText})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    appendMessage(data.response, 'bot');
+                });
+            }
+        });
+
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
